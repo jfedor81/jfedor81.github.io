@@ -72,10 +72,20 @@ img{
 }
 
 video{
-    margin: 0 0 1% 0.5%;
+    width: 99%;
+    height: auto;
+    margin: 0 0.5% 1% 0.5%;
+    float: left;
 }
 
 @media only screen and (min-width: 768px){
+    video{
+        width: 49%;
+        height: auto;
+        margin: 0 0.5% 1% 0.5%;
+        float: left;
+    }
+
     img{
         float:left;
         width: 49%;  
