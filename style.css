@@ -2,6 +2,12 @@
     box-sizing: border-box;
 }
 
+.instaLogo{
+    width: 80px;
+    margin: 0;
+    float: right;
+}
+
 html{
     height: 100%;
     font-family: 'Raleway', sans-serif;
@@ -9,6 +15,10 @@ html{
 
 h1, h4{
     margin: 0;
+}
+
+h1 {
+    margin-left: 80px;
 }
 
 header{
