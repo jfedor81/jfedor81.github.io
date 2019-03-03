@@ -74,11 +74,38 @@
 74
 75
 76
-77</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">java.util.Arrays;</span>
-<span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">java.util.concurrent.RecursiveAction;</span> <span style="color: #008800; font-style: italic; background-color: #0f140f">//TODO: #1 Package import</span>
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">java.util.Arrays;</span>
+<span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">java.util.Random;</span>
+<span style="color: #fb660a; font-weight: bold">import</span> <span style="color: #ffffff">java.util.concurrent.RecursiveAction;</span> <span style="color: #008800; font-style: italic; background-color: #0f140f">//TODO: #1 </span>
 
-<span style="color: #fb660a; font-weight: bold">public</span> <span style="color: #fb660a; font-weight: bold">class</span> <span style="color: #ffffff">ParallelMergeSort</span> <span style="color: #fb660a; font-weight: bold">extends</span> <span style="color: #ffffff">RecursiveAction{</span> <span style="color: #008800; font-style: italic; background-color: #0f140f">//TODO: #2 Dedenie triedy</span>
-    <span style="color: #008800; font-style: italic; background-color: #0f140f">// Decides when to fork or compute directly:</span>
+<span style="color: #fb660a; font-weight: bold">public</span> <span style="color: #fb660a; font-weight: bold">class</span> <span style="color: #ffffff">ParallelMergeSort</span> <span style="color: #fb660a; font-weight: bold">extends</span> <span style="color: #ffffff">RecursiveAction{</span> <span style="color: #008800; font-style: italic; background-color: #0f140f">//TODO: #2</span>
+
+    <span style="color: #fb660a; font-weight: bold">public</span> <span style="color: #fb660a; font-weight: bold">static</span> <span style="color: #cdcaa9; font-weight: bold">void</span> <span style="color: #ff0086; font-weight: bold">main</span><span style="color: #ffffff">(String[]</span> <span style="color: #ffffff">args)</span> <span style="color: #ffffff">{</span>
+
+        <span style="color: #cdcaa9; font-weight: bold">int</span><span style="color: #ffffff">[]</span> <span style="color: #ffffff">parallel</span> <span style="color: #ffffff">=</span> <span style="color: #fb660a; font-weight: bold">new</span> <span style="color: #ffffff">Random().</span><span style="color: #ff0086; font-weight: bold">ints</span><span style="color: #ffffff">(</span><span style="color: #0086f7; font-weight: bold">100</span><span style="color: #ffffff">_000_000).</span><span style="color: #ff0086; font-weight: bold">toArray</span><span style="color: #ffffff">();</span>
+
+        <span style="color: #ffffff">ParallelMergeSort</span> <span style="color: #ffffff">sorter</span> <span style="color: #ffffff">=</span> <span style="color: #fb660a; font-weight: bold">new</span> <span style="color: #ffffff">ParallelMergeSort(parallel);</span>
+        <span style="color: #cdcaa9; font-weight: bold">long</span> <span style="color: #ffffff">start</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">System.</span><span style="color: #ff0086; font-weight: bold">currentTimeMillis</span><span style="color: #ffffff">();</span>
+        <span style="color: #ffffff">sorter.</span><span style="color: #ff0086; font-weight: bold">sort</span><span style="color: #ffffff">();</span>
+        <span style="color: #ffffff">System.</span><span style="color: #ff0086; font-weight: bold">out</span><span style="color: #ffffff">.</span><span style="color: #ff0086; font-weight: bold">println</span><span style="color: #ffffff">(</span><span style="color: #0086d2">&quot;Parallel Merge Sort done in: &quot;</span>
+                <span style="color: #ffffff">+</span> <span style="color: #ffffff">(System.</span><span style="color: #ff0086; font-weight: bold">currentTimeMillis</span><span style="color: #ffffff">()-start));</span>
+
+    <span style="color: #ffffff">}</span>
+
     <span style="color: #fb660a; font-weight: bold">private</span> <span style="color: #fb660a; font-weight: bold">static</span> <span style="color: #fb660a; font-weight: bold">final</span> <span style="color: #cdcaa9; font-weight: bold">int</span> <span style="color: #ffffff">SORT_THRESHOLD</span> <span style="color: #ffffff">=</span> <span style="color: #0086f7; font-weight: bold">128</span><span style="color: #ffffff">;</span>
 
     <span style="color: #fb660a; font-weight: bold">private</span> <span style="color: #fb660a; font-weight: bold">final</span> <span style="color: #cdcaa9; font-weight: bold">int</span><span style="color: #ffffff">[]</span> <span style="color: #ffffff">values;</span>
@@ -107,11 +134,11 @@
                 <span style="color: #ffffff">insertionSort();</span>
             <span style="color: #ffffff">}</span> <span style="color: #fb660a; font-weight: bold">else</span> <span style="color: #ffffff">{</span>
                 <span style="color: #cdcaa9; font-weight: bold">int</span> <span style="color: #ffffff">mid</span> <span style="color: #ffffff">=</span> <span style="color: #ffffff">from</span> <span style="color: #ffffff">+</span> <span style="color: #ffffff">Math.</span><span style="color: #ff0086; font-weight: bold">floorDiv</span><span style="color: #ffffff">(size,</span> <span style="color: #0086f7; font-weight: bold">2</span><span style="color: #ffffff">);</span>
-                <span style="color: #008800; font-style: italic; background-color: #0f140f">//---------TODO: #3 Doplnenie metódy</span>
-                <span style="color: #ffffff">invokeAll(</span>                  
+                <span style="color: #008800; font-style: italic; background-color: #0f140f">//--------------TODO: #3 -----------------</span>
+                <span style="color: #ffffff">invokeAll(</span>
                         <span style="color: #fb660a; font-weight: bold">new</span> <span style="color: #ff0086; font-weight: bold">ParallelMergeSort</span><span style="color: #ffffff">(values,</span> <span style="color: #ffffff">from,</span> <span style="color: #ffffff">mid),</span>
                         <span style="color: #fb660a; font-weight: bold">new</span> <span style="color: #ff0086; font-weight: bold">ParallelMergeSort</span><span style="color: #ffffff">(values,</span> <span style="color: #ffffff">mid</span> <span style="color: #ffffff">+</span> <span style="color: #0086f7; font-weight: bold">1</span><span style="color: #ffffff">,</span> <span style="color: #ffffff">to));</span>
-                <span style="color: #008800; font-style: italic; background-color: #0f140f">//--------------------------</span>
+                <span style="color: #008800; font-style: italic; background-color: #0f140f">//-----------------------------------------------------------------------------</span>
                 <span style="color: #ffffff">merge(mid);</span>
             <span style="color: #ffffff">}</span>
         <span style="color: #ffffff">}</span>
