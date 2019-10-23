@@ -1,0 +1,153 @@
+#include <mpi.h>
+#include <stdio.h>
+#define MATRICESIZE 4
+#define TABLESIZE MATRICESIZE*MATRICESIZE
+int main(int argc,char** argv)
+{ int size, rank;
+int slave;
+int matriceX[MATRICESIZE];
+int matriceY[MATRICESIZE];
+//int results[(MATRICESIZE/2)*(MATRICESIZE/2)];
+int results[MATRICESIZE];
+int finalTable[TABLESIZE];
+int n, value;
+float rval;
+MPI_Status status;
+
+//matriceX[0] = 2; matriceX[1] = 1; matriceX[2] = 0; matriceX[3] = 2;
+//matriceY[0] = 4; matriceY[1] = 4; matriceY[2] = 8; matriceY[3] = 8;
+
+/* Initialize MPI  */
+MPI_Init(&argc, &argv);
+/*
+* Determine size in the world group.
+*/
+MPI_Comm_size(MPI_COMM_WORLD, &size);
+if (size == 5) {/* Correct number of processes *}
+				/*
+				* Determine my rank in the world group.
+				* The master will be rank 0 and the slaves, rank 1...size-1
+				*/
+
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+	if (rank == 0) { /* Master */
+		printf("\n -----------------------------");
+		n = 0;
+		for (slave = 1; slave < size; slave++) {
+			matriceX[0] = 2; matriceX[1] = 1; matriceX[2] = 0; matriceX[3] = 2;
+			matriceY[0] = 4; matriceY[1] = 4; matriceY[2] = 8; matriceY[3] = 8;
+			printf("\n from master %d to slave %d", rank, slave);
+			//MPI_Send(&matriceX[n], 1, MPI_INT, slave, 1, MPI_COMM_WORLD);
+			MPI_Send(&matriceX[n], 1, MPI_INT, slave, 1, MPI_COMM_WORLD);
+			MPI_Send(matriceY, 4, MPI_INT, slave, 1, MPI_COMM_WORLD);
+			n++;
+		}
+		printf("\n\n Receiving the results from slaves");
+		printf("\n ---------------------------------");
+		int counter = 0;
+		MPI_Recv(results, MATRICESIZE, MPI_INT, 1, 11, MPI_COMM_WORLD, &status);
+		for (int i = 0; i < MATRICESIZE; i++){
+			printf("%d  ", results[i]);
+		}
+		printf("\n");
+		/*counter = 0;
+		for (int i = 0; i < MATRICESIZE/2; i++){
+			for (int j = 0; j < MATRICESIZE / 2; j++){
+				finalTable[j + (i*MATRICESIZE)] = results[counter];
+				counter++;
+			}
+			
+		}*/
+		MPI_Recv(results, MATRICESIZE, MPI_INT, 2, 22, MPI_COMM_WORLD, &status);
+		for (int i = 0; i < MATRICESIZE; i++){
+			printf("%d  ", results[i]);
+		}
+		printf("\n");
+		/*counter = 0;
+		for (int i = 0; i < MATRICESIZE / 2; i++){
+			for (int j = 0; j < MATRICESIZE / 2; j++){
+				finalTable[j + (i*MATRICESIZE)] = results[counter];
+				counter++;
+			}
+
+		}*/
+		MPI_Recv(results, MATRICESIZE, MPI_INT, 3, 33, MPI_COMM_WORLD, &status);
+		for (int i = 0; i < MATRICESIZE; i++){
+			printf("%d  ", results[i]);
+		}
+		printf("\n");
+		/*counter = 0;
+		for (int i = 0; i < MATRICESIZE / 2; i++){
+			for (int j = 0; j < MATRICESIZE / 2; j++){
+				finalTable[j + (i*MATRICESIZE)] = results[counter];
+				counter++;
+			}
+
+		}*/
+		MPI_Recv(results, MATRICESIZE, MPI_INT, 4, 44, MPI_COMM_WORLD, &status);
+		for (int i = 0; i < MATRICESIZE; i++){
+			printf("%d  ", results[i]);
+		}
+		printf("\n");
+		/*counter = 0;
+		for (int i = 0; i < MATRICESIZE / 2; i++){
+			for (int j = 0; j < MATRICESIZE / 2; j++){
+				finalTable[j + (i*MATRICESIZE)] = results[counter];
+				counter++;
+			}
+
+		}*/
+
+		/*counter = 0;
+		for (int i = 0; i < MATRICESIZE; i++){
+			for (int j = 0; j < MATRICESIZE; j++){
+				printf("%d ", finalTable[counter]);
+				counter++;
+			}
+			printf("\n");
+		}*/
+
+	}
+	else {
+		if (rank == 1) {
+			MPI_Recv(&matriceX[0], 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(matriceY, 4, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			
+			for (int i = 0; i < MATRICESIZE; i++){
+				results[i] = matriceX[0] * matriceY[i];
+			}
+			MPI_Send(results, MATRICESIZE, MPI_INT, 0, 11, MPI_COMM_WORLD);
+		}
+		else if (rank == 2) {
+			MPI_Recv(&matriceX[1], 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(matriceY, 4, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			
+			for (int i = 0; i < MATRICESIZE; i++){
+				results[i] = matriceX[1] * matriceY[i];
+			}
+			MPI_Send(results, MATRICESIZE, MPI_INT, 0, 22, MPI_COMM_WORLD);
+		}
+		else if (rank == 3){
+			MPI_Recv(&matriceX[2], 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(matriceY, 4, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			
+			for (int i = 0; i < MATRICESIZE; i++){
+				results[i] = matriceX[2] * matriceY[i];
+			}
+			MPI_Send(results, MATRICESIZE, MPI_INT, 0, 33, MPI_COMM_WORLD);
+		}
+		else {
+			MPI_Recv(&matriceX[3], 1, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			MPI_Recv(matriceY, 4, MPI_INT, 0, 1, MPI_COMM_WORLD, &status);
+			
+			for (int i = 0; i < MATRICESIZE; i++){
+				results[i] = matriceX[3] * matriceY[i];
+			}
+			MPI_Send(results, MATRICESIZE, MPI_INT, 0, 44, MPI_COMM_WORLD);
+		}
+	}
+}
+MPI_Finalize();
+return(0);
+}
