@@ -1,0 +1,154 @@
+<!-- HTML generated using hilite.me --><div style="background: #202020; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><pre style="margin: 0; line-height: 125%"><span style="color: #cd2828; font-weight: bold">#include &lt;mpi.h&gt;</span>
+<span style="color: #cd2828; font-weight: bold">#include &lt;stdio.h&gt;</span>
+<span style="color: #cd2828; font-weight: bold">#define MATRICESIZE 4</span>
+<span style="color: #cd2828; font-weight: bold">#define TABLESIZE MATRICESIZE*MATRICESIZE</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #447fcf">main</span><span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">argc,</span><span style="color: #6ab825; font-weight: bold">char</span><span style="color: #d0d0d0">**</span> <span style="color: #d0d0d0">argv)</span>
+<span style="color: #d0d0d0">{</span> <span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">size,</span> <span style="color: #d0d0d0">rank;</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">slave;</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">matriceX[MATRICESIZE];</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">matriceY[MATRICESIZE];</span>
+<span style="color: #999999; font-style: italic">//int results[(MATRICESIZE/2)*(MATRICESIZE/2)];</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">results[MATRICESIZE];</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">finalTable[TABLESIZE];</span>
+<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">n,</span> <span style="color: #d0d0d0">value;</span>
+<span style="color: #6ab825; font-weight: bold">float</span> <span style="color: #d0d0d0">rval;</span>
+<span style="color: #d0d0d0">MPI_Status</span> <span style="color: #d0d0d0">status;</span>
+
+<span style="color: #999999; font-style: italic">//matriceX[0] = 2; matriceX[1] = 1; matriceX[2] = 0; matriceX[3] = 2;</span>
+<span style="color: #999999; font-style: italic">//matriceY[0] = 4; matriceY[1] = 4; matriceY[2] = 8; matriceY[3] = 8;</span>
+
+<span style="color: #999999; font-style: italic">/* Initialize MPI  */</span>
+<span style="color: #d0d0d0">MPI_Init(&amp;argc,</span> <span style="color: #d0d0d0">&amp;argv);</span>
+<span style="color: #999999; font-style: italic">/*</span>
+<span style="color: #999999; font-style: italic">* Determine size in the world group.</span>
+<span style="color: #999999; font-style: italic">*/</span>
+<span style="color: #d0d0d0">MPI_Comm_size(MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;size);</span>
+<span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(size</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">5</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span><span style="color: #999999; font-style: italic">/* Correct number of processes *}</span>
+<span style="color: #999999; font-style: italic">				/*</span>
+<span style="color: #999999; font-style: italic">				* Determine my rank in the world group.</span>
+<span style="color: #999999; font-style: italic">				* The master will be rank 0 and the slaves, rank 1...size-1</span>
+<span style="color: #999999; font-style: italic">				*/</span>
+
+	<span style="color: #d0d0d0">MPI_Comm_rank(MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;rank);</span>
+
+	<span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(rank</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span> <span style="color: #999999; font-style: italic">/* Master */</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n -----------------------------&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #d0d0d0">n</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span>
+		<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(slave</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">slave</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">size;</span> <span style="color: #d0d0d0">slave++)</span> <span style="color: #d0d0d0">{</span>
+			<span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">3</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">;</span>
+			<span style="color: #d0d0d0">matriceY[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceY[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceY[</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">matriceY[</span><span style="color: #3677a9">3</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">8</span><span style="color: #d0d0d0">;</span>
+			<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n from master %d to slave %d&quot;</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">rank,</span> <span style="color: #d0d0d0">slave);</span>
+			<span style="color: #999999; font-style: italic">//MPI_Send(&amp;matriceX[n], 1, MPI_INT, slave, 1, MPI_COMM_WORLD);</span>
+			<span style="color: #d0d0d0">MPI_Send(&amp;matriceX[n],</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #d0d0d0">slave,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+			<span style="color: #d0d0d0">MPI_Send(matriceY,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #d0d0d0">slave,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+			<span style="color: #d0d0d0">n++;</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n\n Receiving the results from slaves&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n ---------------------------------&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">counter</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span>
+		<span style="color: #d0d0d0">MPI_Recv(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">11</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+		<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+			<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;%d  &quot;</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">results[i]);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #999999; font-style: italic">/*counter = 0;</span>
+<span style="color: #999999; font-style: italic">		for (int i = 0; i &lt; MATRICESIZE/2; i++){</span>
+<span style="color: #999999; font-style: italic">			for (int j = 0; j &lt; MATRICESIZE / 2; j++){</span>
+<span style="color: #999999; font-style: italic">				finalTable[j + (i*MATRICESIZE)] = results[counter];</span>
+<span style="color: #999999; font-style: italic">				counter++;</span>
+<span style="color: #999999; font-style: italic">			}</span>
+<span style="color: #999999; font-style: italic">			</span>
+<span style="color: #999999; font-style: italic">		}*/</span>
+		<span style="color: #d0d0d0">MPI_Recv(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">22</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+		<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+			<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;%d  &quot;</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">results[i]);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #999999; font-style: italic">/*counter = 0;</span>
+<span style="color: #999999; font-style: italic">		for (int i = 0; i &lt; MATRICESIZE / 2; i++){</span>
+<span style="color: #999999; font-style: italic">			for (int j = 0; j &lt; MATRICESIZE / 2; j++){</span>
+<span style="color: #999999; font-style: italic">				finalTable[j + (i*MATRICESIZE)] = results[counter];</span>
+<span style="color: #999999; font-style: italic">				counter++;</span>
+<span style="color: #999999; font-style: italic">			}</span>
+
+<span style="color: #999999; font-style: italic">		}*/</span>
+		<span style="color: #d0d0d0">MPI_Recv(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">3</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">33</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+		<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+			<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;%d  &quot;</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">results[i]);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #999999; font-style: italic">/*counter = 0;</span>
+<span style="color: #999999; font-style: italic">		for (int i = 0; i &lt; MATRICESIZE / 2; i++){</span>
+<span style="color: #999999; font-style: italic">			for (int j = 0; j &lt; MATRICESIZE / 2; j++){</span>
+<span style="color: #999999; font-style: italic">				finalTable[j + (i*MATRICESIZE)] = results[counter];</span>
+<span style="color: #999999; font-style: italic">				counter++;</span>
+<span style="color: #999999; font-style: italic">			}</span>
+
+<span style="color: #999999; font-style: italic">		}*/</span>
+		<span style="color: #d0d0d0">MPI_Recv(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">44</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+		<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+			<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;%d  &quot;</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">results[i]);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #d0d0d0">printf(</span><span style="color: #ed9d13">&quot;\n&quot;</span><span style="color: #d0d0d0">);</span>
+		<span style="color: #999999; font-style: italic">/*counter = 0;</span>
+<span style="color: #999999; font-style: italic">		for (int i = 0; i &lt; MATRICESIZE / 2; i++){</span>
+<span style="color: #999999; font-style: italic">			for (int j = 0; j &lt; MATRICESIZE / 2; j++){</span>
+<span style="color: #999999; font-style: italic">				finalTable[j + (i*MATRICESIZE)] = results[counter];</span>
+<span style="color: #999999; font-style: italic">				counter++;</span>
+<span style="color: #999999; font-style: italic">			}</span>
+
+<span style="color: #999999; font-style: italic">		}*/</span>
+
+		<span style="color: #999999; font-style: italic">/*counter = 0;</span>
+<span style="color: #999999; font-style: italic">		for (int i = 0; i &lt; MATRICESIZE; i++){</span>
+<span style="color: #999999; font-style: italic">			for (int j = 0; j &lt; MATRICESIZE; j++){</span>
+<span style="color: #999999; font-style: italic">				printf(&quot;%d &quot;, finalTable[counter]);</span>
+<span style="color: #999999; font-style: italic">				counter++;</span>
+<span style="color: #999999; font-style: italic">			}</span>
+<span style="color: #999999; font-style: italic">			printf(&quot;\n&quot;);</span>
+<span style="color: #999999; font-style: italic">		}*/</span>
+
+	<span style="color: #d0d0d0">}</span>
+	<span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #d0d0d0">{</span>
+		<span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(rank</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+			<span style="color: #d0d0d0">MPI_Recv(&amp;matriceX[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">],</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			<span style="color: #d0d0d0">MPI_Recv(matriceY,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			
+			<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+				<span style="color: #d0d0d0">results[i]</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">matriceY[i];</span>
+			<span style="color: #d0d0d0">}</span>
+			<span style="color: #d0d0d0">MPI_Send(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">11</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(rank</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">2</span><span style="color: #d0d0d0">)</span> <span style="color: #d0d0d0">{</span>
+			<span style="color: #d0d0d0">MPI_Recv(&amp;matriceX[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">],</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			<span style="color: #d0d0d0">MPI_Recv(matriceY,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			
+			<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+				<span style="color: #d0d0d0">results[i]</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">1</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">matriceY[i];</span>
+			<span style="color: #d0d0d0">}</span>
+			<span style="color: #d0d0d0">MPI_Send(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">22</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #6ab825; font-weight: bold">if</span> <span style="color: #d0d0d0">(rank</span> <span style="color: #d0d0d0">==</span> <span style="color: #3677a9">3</span><span style="color: #d0d0d0">){</span>
+			<span style="color: #d0d0d0">MPI_Recv(&amp;matriceX[</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">],</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			<span style="color: #d0d0d0">MPI_Recv(matriceY,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			
+			<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+				<span style="color: #d0d0d0">results[i]</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">2</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">matriceY[i];</span>
+			<span style="color: #d0d0d0">}</span>
+			<span style="color: #d0d0d0">MPI_Send(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">33</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+		<span style="color: #d0d0d0">}</span>
+		<span style="color: #6ab825; font-weight: bold">else</span> <span style="color: #d0d0d0">{</span>
+			<span style="color: #d0d0d0">MPI_Recv(&amp;matriceX[</span><span style="color: #3677a9">3</span><span style="color: #d0d0d0">],</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			<span style="color: #d0d0d0">MPI_Recv(matriceY,</span> <span style="color: #3677a9">4</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">1</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD,</span> <span style="color: #d0d0d0">&amp;status);</span>
+			
+			<span style="color: #6ab825; font-weight: bold">for</span> <span style="color: #d0d0d0">(</span><span style="color: #6ab825; font-weight: bold">int</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">=</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">;</span> <span style="color: #d0d0d0">i</span> <span style="color: #d0d0d0">&lt;</span> <span style="color: #d0d0d0">MATRICESIZE;</span> <span style="color: #d0d0d0">i++){</span>
+				<span style="color: #d0d0d0">results[i]</span> <span style="color: #d0d0d0">=</span> <span style="color: #d0d0d0">matriceX[</span><span style="color: #3677a9">3</span><span style="color: #d0d0d0">]</span> <span style="color: #d0d0d0">*</span> <span style="color: #d0d0d0">matriceY[i];</span>
+			<span style="color: #d0d0d0">}</span>
+			<span style="color: #d0d0d0">MPI_Send(results,</span> <span style="color: #d0d0d0">MATRICESIZE,</span> <span style="color: #d0d0d0">MPI_INT,</span> <span style="color: #3677a9">0</span><span style="color: #d0d0d0">,</span> <span style="color: #3677a9">44</span><span style="color: #d0d0d0">,</span> <span style="color: #d0d0d0">MPI_COMM_WORLD);</span>
+		<span style="color: #d0d0d0">}</span>
+	<span style="color: #d0d0d0">}</span>
+<span style="color: #d0d0d0">}</span>
+<span style="color: #d0d0d0">MPI_Finalize();</span>
+<span style="color: #6ab825; font-weight: bold">return</span><span style="color: #d0d0d0">(</span><span style="color: #3677a9">0</span><span style="color: #d0d0d0">);</span>
+<span style="color: #d0d0d0">}</span>
+</pre></div>
